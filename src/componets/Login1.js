@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import {Link, Redirect} from 'react-router-dom'
 import axios from 'axios'
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import Dashboard from './Dashboard'
 const url = 'http://localhost:4000/api'
-const Login1 = () => {
+const Login1 = ({history}) => {
     const [logindata, setLogindata] = useState({ email: "", password: "" })
-    // const [error, setError] = useState([])
+    const [error, setError] = useState("")
     // const [user, setUser] = useState(false)
     //  const [loginState, setLoginState] = useState(false)
     const handleSubmit = (e) => {
@@ -16,12 +16,30 @@ const Login1 = () => {
             [e.target.name]:value
         })
     }
+    useEffect(() => {
+        if (localStorage.getItem('token') ) {
+            history.push('/dash')
+        }
+    },[history])
     const handleLogin = async (e) => {
         e.preventDefault()
-        const response = await axios.post(`${url}/login`, {email:logindata.email,password:logindata.password})
-        console.log(response.data.token)
-        localStorage.setItem('token', JSON.stringify(response.data.token))
-        window.location='/dashboard'
+        try {
+            const response = await axios.post(`${url}/login`, {email:logindata.email,password:logindata.password})
+            console.log(response)
+            if (response.data.token) {
+                localStorage.setItem('token', JSON.stringify(response.data.token))
+                history.push('/dash')  
+            } else {
+                setError(response.data)    
+                
+            }
+             setTimeout(() => {
+                  setError("")  
+                },3000)
+        } catch (error) {
+            console.log(error)
+            
+        }
     }
 
 
@@ -30,7 +48,7 @@ const Login1 = () => {
             <div className="row mx-auto">
                 <div className="col text-center d-flex justify-content-center mt-5">
                     <div className="card" style={{width:'20rem'}}>
-                        
+                        {error && <p>{error }</p>}
                         <div className="card-body">
                             <form onSubmit={handleLogin}>
                                 <h3 className='mb-3'>Login</h3>

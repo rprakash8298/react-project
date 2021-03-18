@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom'
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import axios from 'axios'
 const url = 'http://localhost:4000/api'
-const Register = () => {
+const Register = ({history}) => {
     // const initialValue = { name:'', email:'', password:'', age:'' }
     const [user, setUser] = useState({name:'', email:'', password:'', age:''})
     const handleChange = (e) => {
@@ -19,7 +19,8 @@ const Register = () => {
         e.preventDefault()
         try {
             const response = await axios.post(`${url}/add_user`, { name:user.name,email:user.email,password:user.password,age:user.age })
-            console.log(response)
+            // localStorage.setItem('token', JSON.stringify(response.data.token))
+            history.push('/login')
         } catch (e) {
             console.log(e)
         }

@@ -1,9 +1,9 @@
-import React, {Component} from 'react'
+import React from 'react'
 import {useState,useEffect} from 'react'
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import axios from 'axios'
 const url = 'http://localhost:4000/api1'
-const Dashboard = () => {
+const Dashboard = ({history}) => {
    
    
     const [taskData, setTaskData] = useState({name:"",completed:""})
@@ -17,16 +17,19 @@ const Dashboard = () => {
    
     const [task, setTask] = useState([])
     useEffect(async () => {
+        if (!localStorage.getItem('token')) {
+            history.push('/login')
+        }
          const config = {
             headers: {
-                Authorization:JSON.parse( localStorage.getItem('token'))
+                Authorization:JSON.parse(localStorage.getItem('token'))
             }
         };
         const response =await axios.get(`${url}/tasks`, config)
         setTask(response.data)
-    },[task])
+    },[history,task])
     
-    const [success, setSucess] = useState([])
+    const [success, setSucess] = useState("")
     const taskDataUpload = async (e) => {
         e.preventDefault()
         const config = {
@@ -37,6 +40,13 @@ const Dashboard = () => {
         const response = await axios.post(`${url}/add_task`, { name: taskData.name, completed: taskData.completed },config)
         console.log(response)
         setSucess(response.data.msg)
+        setTimeout(() => {
+           setSucess("") 
+        },3000)
+    }
+    const logoutHandler = () => {
+        localStorage.removeItem('token')
+        history.push('/login')
     }
     
     return (
@@ -53,7 +63,8 @@ const Dashboard = () => {
                                 <div className='form-group'>
                                 <input type="text" name='completed' value={taskData.completed} className='form-control' onChange={handleSubmit}/>
                                 </div>
-                                <button type='submit' className='btn btn-primary'>create</button>
+                            <button type='submit' className='btn btn-primary'>create</button>
+                            <button className='btn btn-secondary' onClick={logoutHandler}>Logout</button>
                             </form>
                         </div>
                 </div>
